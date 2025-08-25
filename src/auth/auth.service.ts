@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateUserDto, JwtPayload } from '../dto/create-user.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 
 export interface User {
   id?: number;
@@ -11,6 +12,12 @@ export interface User {
 @Injectable()
 export class AuthService {
   private users: User[] = [];
+
+  private readonly jwtSecret = process.env.JWT_SECRET || 'default-secret';
+
+  generateToken(payload: JwtPayload): string {
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: '1w' });
+  }
 
   async register(
     createUserDto: CreateUserDto,
@@ -35,13 +42,14 @@ export class AuthService {
     return this.returnUserWithoutPassword(user);
   }
 
-  async login(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async login(
+    createUserDto: CreateUserDto,
+  ): Promise<{ user: Omit<User, 'password'>; accessToken: string }> {
     const user = this.users.find(
       (u) =>
         u.username?.toLowerCase() === createUserDto.username?.toLowerCase(),
     );
 
-    // Check if user exists and password is defined
     if (!user || !user.password) {
       throw new HttpException(
         { message: 'Invalid credentials' },
@@ -49,7 +57,6 @@ export class AuthService {
       );
     }
 
-    // Await the promise outside the boolean condition
     const passwordsMatch = await bcrypt.compare(
       createUserDto.password,
       user.password,
@@ -62,7 +69,16 @@ export class AuthService {
       );
     }
 
-    return this.returnUserWithoutPassword(user);
+    const userWithoutPassword = this.returnUserWithoutPassword(user);
+    const accessToken = this.generateToken({
+      username: userWithoutPassword.username,
+      id: userWithoutPassword.id, // Если есть ID
+    });
+
+    return {
+      user: userWithoutPassword,
+      accessToken,
+    };
   }
 
   private returnUserWithoutPassword(user: User): Omit<User, 'password'> {

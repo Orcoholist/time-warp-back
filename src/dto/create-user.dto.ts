@@ -9,3 +9,8 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Password is required' })
   password: string = '';
 }
+
+export interface JwtPayload {
+  username: string;
+  id?: number;
+}

@@ -14,15 +14,15 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   // Настройка CORS с переменными из .env
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
-    'http://localhost:3001',
-  ];
+  // const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
+  //   'http://localhost:3001',
+  // ];
 
-  app.enableCors({
-    origin: corsOrigins,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  // app.enableCors({
+  //   origin: corsOrigins,
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   credentials: true,
+  // });
 
   app.useGlobalPipes(
     new ValidationPipe({

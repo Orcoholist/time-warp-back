@@ -10,19 +10,18 @@ dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Используйте PORT из .env
   const port = process.env.PORT || 3000;
 
-  // Настройка CORS с переменными из .env
-  // const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
-  //   'http://localhost:3001',
-  // ];
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
+    'http://localhost:3001', // Локальный фронтенд
+    'https://time-warp-rxs7.vercel.app', // Домашний фронтенд
+  ];
 
-  // app.enableCors({
-  //   origin: corsOrigins,
-  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: corsOrigins,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

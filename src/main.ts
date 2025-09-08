@@ -14,7 +14,7 @@ async function bootstrap() {
 
   const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3001', // Локальный фронтенд
-    'https://time-warp-rxs7.vercel.app', // Домашний фронтенд
+    'https://time-warp-rxs7.vercel.app', //  фронтенд
   ];
 
   app.enableCors({
@@ -30,7 +30,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+  // app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(port);
 }
 void bootstrap();

@@ -21,12 +21,10 @@ export class AuthService {
 
   async register(
     createUserDto: CreateUserDto,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<{ user: Omit<User, 'password'>; accessToken: string }> {
     console.log('Received DTO:', createUserDto);
 
-    // Проверка наличия пароля
     if (!createUserDto.password) {
-      // Явно указываем тип ошибки через `HttpException`
       throw new HttpException(
         { message: 'Password is required' },
         HttpStatus.BAD_REQUEST,
@@ -34,12 +32,24 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const user: User = {
+    const newUser: User = {
       ...createUserDto,
       password: hashedPassword,
+      id: this.users.length + 1, // Автоматическое присвоение ID
     };
-    this.users.push(user);
-    return this.returnUserWithoutPassword(user);
+    this.users.push(newUser);
+    const userWithoutPassword = this.returnUserWithoutPassword(newUser);
+
+    // Генерация токена
+    const accessToken = this.generateToken({
+      username: userWithoutPassword.username,
+      id: userWithoutPassword.id,
+    });
+
+    return {
+      user: userWithoutPassword,
+      accessToken,
+    };
   }
 
   async login(

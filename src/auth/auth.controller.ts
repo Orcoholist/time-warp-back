@@ -1,4 +1,3 @@
-// src/auth/auth.controller.ts
 import {
   Controller,
   Post,
@@ -6,7 +5,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService, User } from './auth.service';
 import { CreateUserDto } from '../dto/create-user.dto';
 
 @Controller('auth')
@@ -14,14 +13,11 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @UsePipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: false,
-      transform: true,
-    }),
-  )
-  async register(@Body() createUserDto: CreateUserDto) {
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async register(@Body() createUserDto: CreateUserDto): Promise<{
+    user: Omit<User, 'password'>;
+    accessToken: string;
+  }> {
     return this.authService.register(createUserDto);
   }
 

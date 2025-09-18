@@ -3,12 +3,33 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Загрузите переменные окружения из .env
 dotenv.config();
 
+// Создаем экземпляр Supabase клиента
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_ANON_KEY!,
+);
+
+interface SupabaseRequest extends Request {
+  supabase: SupabaseClient;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .use((req: SupabaseRequest, res, next) => {
+      req.supabase = supabase;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      next();
+    });
 
   const port = process.env.PORT || 3000;
 

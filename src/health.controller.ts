@@ -1,10 +1,14 @@
 // src/health.controller.ts
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { SupabaseService } from './supabase.service';
+import { TimewarpService } from './timewarp.service';
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly timewarpService: TimewarpService,
+  ) {}
 
   @Get()
   async checkDatabaseHealth() {
@@ -23,24 +27,40 @@ export class HealthController {
     }
   }
 
-  @Get('timewarp')
-  async getTimewarpData(): Promise<any> {
-    try {
-      const records = await this.supabaseService.getAllTimewarpRecords();
+  // @Get('timewarp')
+  // async getTimewarpData(): Promise<any> {
+  //   try {
+  //     const records = await this.supabaseService.getAllTimewarpRecords();
 
-      return records; // Возвращаем все записи
+  //     return records; // Возвращаем все записи
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       throw new HttpException(
+  //         error.message,
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     } else {
+  //       throw new HttpException(
+  //         'Неизвестная ошибка',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
+  //   }
+  // }
+
+  @Get('timewarp')
+  async getTimewarpData(): Promise<Record<string, any>[]> {
+    try {
+      return await this.timewarpService.getAllTimewarpRecords();
     } catch (error) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'Неизвестная ошибка',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      // Проверяем тип ошибки
+      const errorMessage =
+        error instanceof Error ? error.message : 'Неизвестная ошибка';
+
+      // Логируем исходную ошибку для отладки
+      console.error('Ошибка при получении данных:', error);
+
+      throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

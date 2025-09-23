@@ -98,3 +98,24 @@ export class AuthService {
     return result;
   }
 }
+
+//  async login(createUserDto: CreateUserDto): Promise<{
+//     user: Omit<Record<string, any>, 'password'>;
+//     accessToken: string;
+//   }> {
+//     const { data, error } = await this.supabaseAuthClient.auth.signInWithPassword({
+//       email: createUserDto.email,
+//       password: createUserDto.password,
+//     });
+
+//     if (error) {
+//       throw new HttpException('Неверные учетные данные', HttpStatus.UNAUTHORIZED);
+//     }
+
+//     const { password, ...userWithoutPassword } = data.user;
+
+//     return {
+//       user: userWithoutPassword,
+//       accessToken: data.session?.access_token,
+//     };
+//   }

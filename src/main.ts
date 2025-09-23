@@ -10,8 +10,8 @@ dotenv.config();
 
 // Создаем экземпляр Supabase клиента
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!,
+  String(process.env.SUPABASE_URL!),
+  String(process.env.SUPABASE_ANON_KEY!),
 );
 
 interface SupabaseRequest extends Request {

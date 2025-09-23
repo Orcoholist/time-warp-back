@@ -10,9 +10,10 @@ import { PrismaService } from './prisma/prisma.service';
 import { TimewarpService } from './timewarp.service';
 import { BigIntInterceptor } from './big-int/big-int.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SeederModule } from './controllers/seeder.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, SeederModule],
   providers: [
     SupabaseService,
     PrismaService,

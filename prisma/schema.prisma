@@ -16,3 +16,11 @@ model timewarp {
   description String?  @db.VarChar
   count       BigInt?
 }
+
+//Направления
+model Direction {
+  id          Int      @id @default(autoincrement())
+  name        String
+  year        Int
+  description String?
+}

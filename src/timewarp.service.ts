@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 
@@ -7,7 +6,6 @@ export class TimewarpService {
   constructor(private prisma: PrismaService) {}
 
   getAllTimewarpRecords(): Promise<Record<string, any>[]> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.timewarp.findMany();
   }
 

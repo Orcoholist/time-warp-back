@@ -21,13 +21,11 @@ interface SupabaseRequest extends Request {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   app
     .getHttpAdapter()
     .getInstance()
     .use((req: SupabaseRequest, res, next) => {
       req.supabase = supabase;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       next();
     });
 

@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto, JwtPayload } from '../dto/create-user.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { PrismaService } from '../../src/prisma/prisma.service';
 import * as jwt from 'jsonwebtoken';
 
 export interface User {
-  id?: number;
+  id: number;
   username: string;
-  password: string;
+  password?: string;
 }
+
 @Injectable()
 export class AuthService {
-  private users: User[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
   private readonly jwtSecret = process.env.JWT_SECRET || 'default-secret';
 
@@ -22,8 +23,6 @@ export class AuthService {
   async register(
     createUserDto: CreateUserDto,
   ): Promise<{ user: Omit<User, 'password'>; accessToken: string }> {
-    console.log('Received DTO:', createUserDto);
-
     if (!createUserDto.password) {
       throw new HttpException(
         { message: 'Password is required' },
@@ -31,16 +30,28 @@ export class AuthService {
       );
     }
 
+    const existingUser = await this.prisma.user.findUnique({
+      where: { username: createUserDto.username.toLowerCase() },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        { message: 'User already exists' },
+        HttpStatus.CONFLICT,
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const newUser: User = {
-      ...createUserDto,
-      password: hashedPassword,
-      id: this.users.length + 1, // Автоматическое присвоение ID
-    };
-    this.users.push(newUser);
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        username: createUserDto.username.toLowerCase(),
+        password: hashedPassword,
+      },
+    });
+
     const userWithoutPassword = this.returnUserWithoutPassword(newUser);
 
-    // Генерация токена
     const accessToken = this.generateToken({
       username: userWithoutPassword.username,
       id: userWithoutPassword.id,
@@ -55,10 +66,9 @@ export class AuthService {
   async login(
     createUserDto: CreateUserDto,
   ): Promise<{ user: Omit<User, 'password'>; accessToken: string }> {
-    const user = this.users.find(
-      (u) =>
-        u.username?.toLowerCase() === createUserDto.username?.toLowerCase(),
-    );
+    const user = await this.prisma.user.findUnique({
+      where: { username: createUserDto.username.toLowerCase() },
+    });
 
     if (!user || !user.password) {
       throw new HttpException(
@@ -82,7 +92,7 @@ export class AuthService {
     const userWithoutPassword = this.returnUserWithoutPassword(user);
     const accessToken = this.generateToken({
       username: userWithoutPassword.username,
-      id: userWithoutPassword.id, // Если есть ID
+      id: userWithoutPassword.id,
     });
 
     return {
@@ -98,24 +108,3 @@ export class AuthService {
     return result;
   }
 }
-
-//  async login(createUserDto: CreateUserDto): Promise<{
-//     user: Omit<Record<string, any>, 'password'>;
-//     accessToken: string;
-//   }> {
-//     const { data, error } = await this.supabaseAuthClient.auth.signInWithPassword({
-//       email: createUserDto.email,
-//       password: createUserDto.password,
-//     });
-
-//     if (error) {
-//       throw new HttpException('Неверные учетные данные', HttpStatus.UNAUTHORIZED);
-//     }
-
-//     const { password, ...userWithoutPassword } = data.user;
-
-//     return {
-//       user: userWithoutPassword,
-//       accessToken: data.session?.access_token,
-//     };
-//   }

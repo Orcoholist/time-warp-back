@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, JwtPayload } from '../dto/create-user.dto';
-import { PrismaService } from '../../src/prisma/prisma.service';
+import { CreateUserDto, JwtPayload } from '../../dto/create-user.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 import * as jwt from 'jsonwebtoken';
 
 export interface User {

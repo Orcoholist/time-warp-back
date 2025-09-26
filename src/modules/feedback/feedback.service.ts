@@ -1,3 +1,4 @@
+// src/modules/feedback/feedback.service.ts
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -15,8 +16,9 @@ export class FeedbackService {
     message: string;
   }) {
     await this.mailerService.sendMail({
-      to: process.env.ADMIN_EMAIL, // Ваш email
-      from: email,
+      to: process.env.ADMIN_EMAIL,
+      from: process.env.EMAIL_USER, // ← Используйте свой аккаунт Mail.ru
+      replyTo: email, // ← Адрес пользователя для ответа
       subject: `Новое сообщение от ${name}`,
       text: `Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`,
       html: `<h2>Новое сообщение:</h2><p><strong>Имя:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Сообщение:</strong></p><p>${message.replace(/\n/g, '<br/>')}</p>`,

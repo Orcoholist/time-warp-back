@@ -34,6 +34,7 @@ async function bootstrap() {
   const corsOrigins = process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:3001', // Локальный фронтенд
     'https://time-warp-rxs7.vercel.app', //  фронтенд
+    'https://time-warp-back-production.up.railway.app', //new
   ];
 
   app.enableCors({

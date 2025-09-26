@@ -25,8 +25,9 @@ export class FeedbackController {
       this.logger.log(`Полученные данные: ${JSON.stringify(dto)}`);
       await this.feedbackService.sendFeedback(dto);
       return { success: true };
-    } catch (error: any) {
-      this.logger.error('Ошибка при отправке сообщения', error.stack);
+    } catch (error) {
+      const typedError = error as Error;
+      this.logger.error('Ошибка при отправке сообщения', typedError.stack);
       throw new HttpException(
         'Не удалось отправить сообщение',
         HttpStatus.INTERNAL_SERVER_ERROR,

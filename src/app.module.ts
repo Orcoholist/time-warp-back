@@ -15,6 +15,7 @@ import { SeederModule } from './controllers/seeder.module';
 import { FeedbackController } from './modules/feedback/feedback.controller';
 import { FeedbackService } from './modules/feedback/feedback.service';
 import { FeedbackModule } from './modules/feedback/feedback.module';
+import { DestinationsModule } from './modules/destinations/destinations.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { FeedbackModule } from './modules/feedback/feedback.module';
     AuthModule,
     SeederModule,
     FeedbackModule,
+    DestinationsModule,
   ],
   providers: [
     SupabaseService,

@@ -17,16 +17,122 @@ model timewarp {
   count       BigInt?
 }
 
-//Направления
 model Direction {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id(map: "Direction_pkey") @default(autoincrement())
   name        String
   year        Int
   description String?
+
+  @@map("directions")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
+model events {
+  id          BigInt     @id @default(autoincrement())
+  created_at  DateTime?  @db.Timestamptz(6)
+  updated_at  DateTime?  @db.Timestamptz(6)
+  deleted_at  DateTime?  @db.Timestamptz(6)
+  timeline_id BigInt?
+  description String?
+  event_time  DateTime?  @db.Timestamptz(6)
+  impact      String?
+  timelines   timelines? @relation(fields: [timeline_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_timelines_events")
+
+  @@index([deleted_at], map: "idx_events_deleted_at")
+  @@index([timeline_id], map: "idx_events_timeline_id")
+}
+
+model time_machines {
+  id           BigInt         @id @default(autoincrement())
+  created_at   DateTime?      @db.Timestamptz(6)
+  updated_at   DateTime?      @db.Timestamptz(6)
+  deleted_at   DateTime?      @db.Timestamptz(6)
+  name         String?
+  description  String?
+  max_distance BigInt?
+  energy_level BigInt?
+  status       String?
+  time_travels time_travels[]
+
+  @@index([deleted_at], map: "idx_time_machines_deleted_at")
+}
+
+model time_travels {
+  id                BigInt         @id @default(autoincrement())
+  created_at        DateTime?      @db.Timestamptz(6)
+  updated_at        DateTime?      @db.Timestamptz(6)
+  deleted_at        DateTime?      @db.Timestamptz(6)
+  user_id           BigInt?
+  time_machine_id   BigInt?
+  start_time        DateTime?      @db.Timestamptz(6)
+  destination       DateTime?      @db.Timestamptz(6)
+  origin            String?
+  destination_point String?
+  status            String?
+  description       String?
+  timeline_id       BigInt?
+  time_machines     time_machines? @relation(fields: [time_machine_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time_machines_time_travels")
+  timelines         timelines?     @relation(fields: [timeline_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time_travels_timeline")
+  users             users?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_time_travels")
+  travel_logs       travel_logs[]
+
+  @@index([deleted_at], map: "idx_time_travels_deleted_at")
+  @@index([time_machine_id], map: "idx_time_travels_time_machine_id")
+  @@index([timeline_id], map: "idx_time_travels_timeline_id")
+  @@index([user_id], map: "idx_time_travels_user_id")
+}
+
+model timelines {
+  id               BigInt         @id @default(autoincrement())
+  created_at       DateTime?      @db.Timestamptz(6)
+  updated_at       DateTime?      @db.Timestamptz(6)
+  deleted_at       DateTime?      @db.Timestamptz(6)
+  name             String?
+  description      String?
+  base_timeline_id BigInt?
+  year             BigInt?
+  events           events[]
+  time_travels     time_travels[]
+  timelines        timelines?     @relation("timelinesTotimelines", fields: [base_timeline_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_timelines_base_timeline")
+  other_timelines  timelines[]    @relation("timelinesTotimelines")
+
+  @@index([base_timeline_id], map: "idx_timelines_base_timeline_id")
+  @@index([deleted_at], map: "idx_timelines_deleted_at")
+}
+
+model travel_logs {
+  id             BigInt        @id @default(autoincrement())
+  created_at     DateTime?     @db.Timestamptz(6)
+  updated_at     DateTime?     @db.Timestamptz(6)
+  deleted_at     DateTime?     @db.Timestamptz(6)
+  time_travel_id BigInt?
+  event_time     DateTime?     @db.Timestamptz(6)
+  details        String?
+  location       String?
+  time_travels   time_travels? @relation(fields: [time_travel_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_time_travels_travel_logs")
+
+  @@index([deleted_at], map: "idx_travel_logs_deleted_at")
+  @@index([time_travel_id], map: "idx_travel_logs_time_travel_id")
+}
+
+model user {
+  id       Int    @id(map: "User_pkey") @default(autoincrement())
+  username String @unique(map: "User_username_key")
+  password String
+}
+
+model users {
+  id            BigInt         @id @default(autoincrement())
+  created_at    DateTime?      @db.Timestamptz(6)
+  updated_at    DateTime?      @db.Timestamptz(6)
+  deleted_at    DateTime?      @db.Timestamptz(6)
+  first_name    String?
+  last_name     String?
+  email         String?        @unique(map: "idx_users_email")
+  password_hash String?
+  role          String?
+  registered_at DateTime?      @db.Timestamptz(6)
+  last_login    DateTime?      @db.Timestamptz(6)
+  time_travels  time_travels[]
+
+  @@index([deleted_at], map: "idx_users_deleted_at")
 }
